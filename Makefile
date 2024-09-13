@@ -7,7 +7,7 @@ build: download
 	go build
 
 test:
-	go test -race ./...
+	go test -race -coverprofile=coverage.out ./...
 
 lint:
 	golangci-lint run
