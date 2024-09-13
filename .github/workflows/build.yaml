@@ -10,6 +10,9 @@ jobs:
           go-version-file: go.mod
       - run: make build 
       - run: make test
+      - uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
       - uses: sarisia/actions-status-discord@v1
         if: always()
         with:
