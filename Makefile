@@ -7,7 +7,7 @@ build: download
 	go build -C cmd/recvcheck
 
 test:
-	go test -race -coverprofile=coverage.txt ./...
+	go test -race -coverprofile=coverage.txt .
 
 lint:
 	golangci-lint run
