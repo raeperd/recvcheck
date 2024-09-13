@@ -42,22 +42,20 @@ func run(pass *analysis.Pass) (any, error) {
 		var st *structType
 		st, ok = structs[recv.Name]
 		if !ok {
-			structs[recv.Name] = &structType{starMethods: []*ast.FuncDecl{}, typeMethods: []*ast.FuncDecl{}}
+			structs[recv.Name] = &structType{recv: recv.Name}
 			st = structs[recv.Name]
 		}
 
 		if isStar {
-			st.starMethods = append(st.starMethods, funcDecl)
+			st.numStarMethod++
 		} else {
-			st.typeMethods = append(st.typeMethods, funcDecl)
+			st.numTypeMethod++
 		}
 	})
 
 	for _, st := range structs {
-		if len(st.starMethods) > 0 && len(st.typeMethods) > 0 {
-			for _, typeMethod := range st.typeMethods {
-				pass.Reportf(typeMethod.Pos(), "receiver type should be a pointer")
-			}
+		if st.numStarMethod > 0 && st.numTypeMethod > 0 {
+			pass.Reportf(pass.Pkg.Scope().Lookup(st.recv).Pos(), "the methods of %q use pointer receiver and non-pointer receiver.", st.recv)
 		}
 	}
 
@@ -65,6 +63,7 @@ func run(pass *analysis.Pass) (any, error) {
 }
 
 type structType struct {
-	starMethods []*ast.FuncDecl
-	typeMethods []*ast.FuncDecl
+	recv          string
+	numStarMethod int
+	numTypeMethod int
 }
