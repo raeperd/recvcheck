@@ -4,7 +4,7 @@ download:
 	go mod download
 
 build: download
-	go build
+	go build -C cmd/recvcheck
 
 test:
 	go test -race -coverprofile=coverage.out ./...
