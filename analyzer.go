@@ -55,7 +55,7 @@ func run(pass *analysis.Pass) (any, error) {
 
 	for _, st := range structs {
 		if st.numStarMethod > 0 && st.numTypeMethod > 0 {
-			pass.Reportf(pass.Pkg.Scope().Lookup(st.recv).Pos(), "the methods of %q use pointer receiver and non pointer receiver.", st.recv)
+			pass.Reportf(pass.Pkg.Scope().Lookup(st.recv).Pos(), "the methods of %q use pointer receiver and non-pointer receiver.", st.recv)
 		}
 	}
 
