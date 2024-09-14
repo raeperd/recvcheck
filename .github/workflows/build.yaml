@@ -1,22 +1,29 @@
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go-version: [ oldstable, stable ]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
-      - run: make build 
+          go-version: ${{ matrix.go-version }}
+      - name: Check and get dependencies
+        run: |
+          go mod download
+          go mod tidy
+          git diff --exit-code go.mod
+          git diff --exit-code go.sum
+      - run: make build
       - run: make test
-      - uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-      - uses: sarisia/actions-status-discord@v1
-        if: always()
-        with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
 
   lint:
     runs-on: ubuntu-latest
@@ -27,4 +34,4 @@ jobs:
           go-version-file: go.mod
       - uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.60
+          version: v1.61

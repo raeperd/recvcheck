@@ -1,5 +1,5 @@
 # recvcheck
-[![.github/workflows/build.yaml](https://github.com/raeperd/recvcheck/actions/workflows/build.yaml/badge.svg)](https://github.com/raeperd/recvcheck/actions/workflows/build.yaml) [![Go Report Card](https://goreportcard.com/badge/github.com/raeperd/recvcheck)](https://goreportcard.com/report/github.com/raeperd/recvcheck) [![codecov](https://codecov.io/gh/raeperd/recvcheck/graph/badge.svg?token=fPYgEHlq1e)](https://codecov.io/gh/raeperd/recvcheck)  
+[![.github/workflows/build.yaml](https://github.com/raeperd/recvcheck/actions/workflows/build.yaml/badge.svg)](https://github.com/raeperd/recvcheck/actions/workflows/build.yaml) [![Go Report Card](https://goreportcard.com/badge/github.com/raeperd/recvcheck)](https://goreportcard.com/report/github.com/raeperd/recvcheck)   
 Golang linter for check receiver type in method 
 
 ## Motivtation
