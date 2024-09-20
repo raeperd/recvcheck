@@ -46,14 +46,14 @@ func run(pass *analysis.Pass) (any, error) {
 		}
 
 		if isStar {
-			st.numStarMethod++
+			st.starUsed = true
 		} else {
-			st.numTypeMethod++
+			st.typeUsed = true
 		}
 	})
 
 	for recv, st := range structs {
-		if st.numStarMethod > 0 && st.numTypeMethod > 0 {
+		if st.starUsed && st.typeUsed {
 			pass.Reportf(pass.Pkg.Scope().Lookup(recv).Pos(), "the methods of %q use pointer receiver and non-pointer receiver.", recv)
 		}
 	}
@@ -62,6 +62,6 @@ func run(pass *analysis.Pass) (any, error) {
 }
 
 type structType struct {
-	numStarMethod int
-	numTypeMethod int
+	starUsed bool
+	typeUsed bool
 }
