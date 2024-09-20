@@ -39,10 +39,9 @@ func run(pass *analysis.Pass) (any, error) {
 			return
 		}
 
-		var st *structType
-		st, ok = structs[recv.Name]
+		st, ok := structs[recv.Name]
 		if !ok {
-			structs[recv.Name] = &structType{recv: recv.Name}
+			structs[recv.Name] = &structType{}
 			st = structs[recv.Name]
 		}
 
@@ -53,9 +52,9 @@ func run(pass *analysis.Pass) (any, error) {
 		}
 	})
 
-	for _, st := range structs {
+	for recv, st := range structs {
 		if st.numStarMethod > 0 && st.numTypeMethod > 0 {
-			pass.Reportf(pass.Pkg.Scope().Lookup(st.recv).Pos(), "the methods of %q use pointer receiver and non-pointer receiver.", st.recv)
+			pass.Reportf(pass.Pkg.Scope().Lookup(recv).Pos(), "the methods of %q use pointer receiver and non-pointer receiver.", recv)
 		}
 	}
 
@@ -63,7 +62,6 @@ func run(pass *analysis.Pass) (any, error) {
 }
 
 type structType struct {
-	recv          string
 	numStarMethod int
 	numTypeMethod int
 }
