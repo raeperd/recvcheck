@@ -33,14 +33,14 @@ func NewAnalyzer(s Setting) *analysis.Analyzer {
 
 // Setting is the configuration for the analyzer.
 type Setting struct {
-	// NoBuiltinExcludeMethod if true, disables the built-in excluded methods.
+	// NoBuiltinExcludeMethod if true, disables the built-in method excludes.
 	// Built-in excluded methods:
 	//   - "MarshalText"
 	//   - "MarshalJSON"
 	//   - "MarshalXML"
 	//   - "MarshalBinary"
 	//   - "GobEncode"
-	NoBuiltinExcludeMethod bool // if true, disables the built-in excluded method signatures.
+	NoBuiltinExcludeMethod bool
 }
 
 func runWithFilter(filter func(*ast.FuncDecl) bool) func(*analysis.Pass) (any, error) {
