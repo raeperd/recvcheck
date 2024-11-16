@@ -12,10 +12,10 @@ func main() {
 		noBuiltinExcludeMethod bool
 	)
 	flag.BoolVar(&noBuiltinExcludeMethod, "no-builtin-exclude-method", false,
-		`disables the default exclude methods such as "MarshalText"`)
+		`disables the default exclude methods such as "MarshalJSON"`)
 
 	setting := recvcheck.Setting{
-		NoBuiltinExcludeMethod: noBuiltinExcludeMethod,
+		DisableBuiltin: noBuiltinExcludeMethod,
 	}
 	singlechecker.Main(recvcheck.NewAnalyzer(setting))
 }

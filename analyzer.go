@@ -10,41 +10,43 @@ import (
 
 // NewAnalyzer returns a new analyzer to check for receiver type consistency.
 func NewAnalyzer(s Setting) *analysis.Analyzer {
-	excludeMethods := []string{ // Default excludes for Marshal/Encode methods #7
-		"MarshalText",
-		"MarshalJSON",
-		"MarshalXML",
-		"MarshalBinary",
-		"GobEncode",
-	}
-	if s.NoBuiltinExcludeMethod {
-		excludeMethods = []string{}
+	// Default excludes for Marshal/Encode methods https://github.com/raeperd/recvcheck/issues/7
+	excludeMethods := map[string]struct{}{
+		"MarshalText":   {},
+		"MarshalJSON":   {},
+		"MarshalYAML":   {},
+		"MarshalXML":    {},
+		"MarshalBinary": {},
+		"GobEncode":     {},
 	}
 
-	filter := newMethodFilter(excludeMethods...)
+	if s.DisableBuiltin {
+		excludeMethods = map[string]struct{}{}
+	}
 
 	return &analysis.Analyzer{
 		Name:     "recvcheck",
 		Doc:      "checks for receiver type consistency",
-		Run:      runWithFilter(filter),
+		Run:      run(newFilter(excludeMethods)),
 		Requires: []*analysis.Analyzer{inspect.Analyzer},
 	}
 }
 
 // Setting is the configuration for the analyzer.
 type Setting struct {
-	// NoBuiltinExcludeMethod if true, disables the built-in method excludes.
+	// DisableBuiltin if true, disables the built-in method excludes.
 	// Built-in excluded methods:
 	//   - "MarshalText"
 	//   - "MarshalJSON"
+	//   - "MarshalYAML"
 	//   - "MarshalXML"
 	//   - "MarshalBinary"
 	//   - "GobEncode"
-	NoBuiltinExcludeMethod bool
+	DisableBuiltin bool
 }
 
-func runWithFilter(filter func(*ast.FuncDecl) bool) func(*analysis.Pass) (any, error) {
-	return func(pass *analysis.Pass) (interface{}, error) {
+func run(filter func(*ast.FuncDecl) bool) func(*analysis.Pass) (any, error) {
+	return func(pass *analysis.Pass) (any, error) {
 		inspector := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
 		structs := map[string]*structType{}
@@ -53,6 +55,7 @@ func runWithFilter(filter func(*ast.FuncDecl) bool) func(*analysis.Pass) (any, e
 			if !ok || funcDecl.Recv == nil || len(funcDecl.Recv.List) != 1 {
 				return
 			}
+
 			if filter(funcDecl) {
 				return
 			}
@@ -99,20 +102,12 @@ type structType struct {
 	typeUsed bool
 }
 
-func newMethodFilter(names ...string) func(*ast.FuncDecl) bool {
-	if len(names) == 0 {
-		return func(*ast.FuncDecl) bool { return false }
-	}
-
-	excludes := make(map[string]struct{}, len(names))
-	for _, name := range names {
-		excludes[name] = struct{}{}
-	}
-
+func newFilter(excludes map[string]struct{}) func(*ast.FuncDecl) bool {
 	return func(f *ast.FuncDecl) bool {
 		if f.Name == nil || f.Name.Name == "" {
 			return true
 		}
+
 		_, found := excludes[f.Name.Name]
 		return found
 	}
