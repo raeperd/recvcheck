@@ -34,4 +34,6 @@ jobs:
           go-version-file: go.mod
       - uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.61
+          version: v1.62
+      - run: make build
+      - run: go vet -vettool=./recvcheck ./...
