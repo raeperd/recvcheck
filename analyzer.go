@@ -2,8 +2,6 @@ package recvcheck
 
 import (
 	"go/ast"
-	"go/types"
-	"strings"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
@@ -12,22 +10,18 @@ import (
 
 // NewAnalyzer returns a new analyzer to check for receiver type consistency.
 func NewAnalyzer(s Setting) *analysis.Analyzer {
-	excludeMethods := []string{ // Default excludes for Marshal/Encode/Value methods #7
-		"MarshalText() ([]byte, error)",
-		"MarshalJSON() ([]byte, error)",
-		"MarshalXML(*xml.Encoder, xml.StartElement) error",
-		"MarshalBinary() ([]byte, error)",
-		"GobEncode() ([]byte, error)",
-		"Value() (driver.Value, error)",
-		"Value() (any, error)",
-		"Value() (interface{}, error)",
+	excludeMethods := []string{ // Default excludes for Marshal/Encode methods #7
+		"MarshalText",
+		"MarshalJSON",
+		"MarshalXML",
+		"MarshalBinary",
+		"GobEncode",
 	}
 	if s.NoBuiltinExcludeMethod {
 		excludeMethods = []string{}
 	}
-	excludeMethods = append(excludeMethods, s.ExcludeMethod...)
 
-	filter := newMethodSignatureFilter(excludeMethods...)
+	filter := newMethodFilter(excludeMethods...)
 
 	return &analysis.Analyzer{
 		Name:     "recvcheck",
@@ -39,27 +33,13 @@ func NewAnalyzer(s Setting) *analysis.Analyzer {
 
 // Setting is the configuration for the analyzer.
 type Setting struct {
-	// ExcludeMethod specifies method signatures to exclude from receiver type checking.
-	// Each signature should be in the format "MethodName(paramTypes) returnTypes".
-	//
-	// Examples of valid signatures:
-	//   - "MarshalJSON() ([]byte, error)"
-	//   - "UnmarshalJSON([]byte) error"
-	//   - "String() string"
-	//
-	// These signatures are merged with built-in excluded signatures unless
-	// NoBuiltinExcludeMethod is set to true.
-	//
-	// Built-in excluded signatures:
-	//   - "MarshalText() ([]byte, error)"
-	//   - "MarshalJSON() ([]byte, error)"
-	//   - "MarshalXML(*xml.Encoder, xml.StartElement) error"
-	//   - "MarshalBinary() ([]byte, error)"
-	//   - "GobEncode() ([]byte, error)"
-	//   - "Value() (driver.Value, error)"
-	//   - "Value() (any, error)"
-	//   - "Value() (interface{}, error)"
-	ExcludeMethod          []string
+	// NoBuiltinExcludeMethod if true, disables the built-in excluded methods.
+	// Built-in excluded methods:
+	//   - "MarshalText"
+	//   - "MarshalJSON"
+	//   - "MarshalXML"
+	//   - "MarshalBinary"
+	//   - "GobEncode"
 	NoBuiltinExcludeMethod bool // if true, disables the built-in excluded method signatures.
 }
 
@@ -119,48 +99,21 @@ type structType struct {
 	typeUsed bool
 }
 
-func newMethodSignatureFilter(signatures ...string) func(*ast.FuncDecl) bool {
-	if len(signatures) == 0 {
+func newMethodFilter(names ...string) func(*ast.FuncDecl) bool {
+	if len(names) == 0 {
 		return func(*ast.FuncDecl) bool { return false }
 	}
 
-	excludes := make(map[string]struct{}, len(signatures))
-	for _, sig := range signatures {
-		excludes[sig] = struct{}{}
+	excludes := make(map[string]struct{}, len(names))
+	for _, name := range names {
+		excludes[name] = struct{}{}
 	}
 
 	return func(f *ast.FuncDecl) bool {
-		// Build signature string: "FuncName(type1, type2) (retType1, retType2), FuncName2() error"
-		var sig strings.Builder
-		sig.WriteString(f.Name.Name)
-		sig.WriteString("(")
-		if f.Type.Params != nil {
-			for i, param := range f.Type.Params.List {
-				if i > 0 {
-					sig.WriteString(", ")
-				}
-				sig.WriteString(types.ExprString(param.Type))
-			}
+		if f.Name == nil || f.Name.Name == "" {
+			return true
 		}
-		sig.WriteString(")")
-
-		if f.Type.Results != nil && len(f.Type.Results.List) > 0 {
-			sig.WriteString(" ")
-			if len(f.Type.Results.List) > 1 {
-				sig.WriteString("(")
-			}
-			for i, result := range f.Type.Results.List {
-				if i > 0 {
-					sig.WriteString(", ")
-				}
-				sig.WriteString(types.ExprString(result.Type))
-			}
-			if len(f.Type.Results.List) > 1 {
-				sig.WriteString(")")
-			}
-		}
-
-		_, exists := excludes[sig.String()]
-		return exists
+		_, found := excludes[f.Name.Name]
+		return found
 	}
 }
