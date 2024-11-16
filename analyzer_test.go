@@ -8,5 +8,5 @@ import (
 )
 
 func TestAnalyzer(t *testing.T) {
-	analysistest.Run(t, analysistest.TestData(), recvcheck.NewAnalyzer(recvcheck.Setting{}), "test")
+	analysistest.Run(t, analysistest.TestData(), recvcheck.NewAnalyzer(recvcheck.Settings{}), "test")
 }
