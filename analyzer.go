@@ -11,7 +11,7 @@ import (
 // NewAnalyzer returns a new analyzer to check for receiver type consistency.
 func NewAnalyzer(s Setting) *analysis.Analyzer {
 	// Default excludes for Marshal/Encode methods https://github.com/raeperd/recvcheck/issues/7
-	excludeMethods := map[string]struct{}{
+	excludedMethods := map[string]struct{}{
 		"MarshalText":   {},
 		"MarshalJSON":   {},
 		"MarshalYAML":   {},
@@ -21,10 +21,10 @@ func NewAnalyzer(s Setting) *analysis.Analyzer {
 	}
 
 	if s.DisableBuiltin {
-		excludeMethods = map[string]struct{}{}
+		excludedMethods = map[string]struct{}{}
 	}
 
-	a := &analyzer{excludeMethods: excludeMethods}
+	a := &analyzer{excludedMethods: excludedMethods}
 
 	return &analysis.Analyzer{
 		Name:     "recvcheck",
@@ -48,7 +48,7 @@ type Setting struct {
 }
 
 type analyzer struct {
-	excludeMethods map[string]struct{}
+	excludedMethods map[string]struct{}
 }
 
 func (r *analyzer) run(pass *analysis.Pass) (any, error) {
@@ -106,7 +106,7 @@ func (r *analyzer) isExcluded(f *ast.FuncDecl) bool {
 		return true
 	}
 
-	_, found := r.excludeMethods[f.Name.Name]
+	_, found := r.excludedMethods[f.Name.Name]
 	return found
 }
 
