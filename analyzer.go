@@ -18,6 +18,7 @@ func NewAnalyzer(s Settings) *analysis.Analyzer {
 		"MarshalXML":    {},
 		"MarshalBinary": {},
 		"GobEncode":     {},
+		"Value":         {},
 	}
 
 	if s.DisableBuiltin {
@@ -44,6 +45,7 @@ type Settings struct {
 	//   - "MarshalXML"
 	//   - "MarshalBinary"
 	//   - "GobEncode"
+	//   - "Value"
 	DisableBuiltin bool
 }
 
