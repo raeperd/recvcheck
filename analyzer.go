@@ -11,24 +11,23 @@ import (
 // NewAnalyzer returns a new analyzer to check for receiver type consistency.
 func NewAnalyzer(s Settings) *analysis.Analyzer {
 	a := &analyzer{
-		// Default excludes for Marshal/Encode methods https://github.com/raeperd/recvcheck/issues/7
-		excludedMethods: map[string]struct{}{
-			"MarshalText":   {},
-			"MarshalJSON":   {},
-			"MarshalYAML":   {},
-			"MarshalXML":    {},
-			"MarshalBinary": {},
-			"GobEncode":     {},
-		},
-		excludedTuple: map[string]struct{}{},
+		excluded: map[string]struct{}{},
 	}
 
-	if s.DisableBuiltin {
-		a.excludedMethods = map[string]struct{}{}
+	if !s.DisableBuiltin {
+		// Default excludes for Marshal/Encode methods https://github.com/raeperd/recvcheck/issues/7
+		a.excluded = map[string]struct{}{
+			"*.MarshalText":   {},
+			"*.MarshalJSON":   {},
+			"*.MarshalYAML":   {},
+			"*.MarshalXML":    {},
+			"*.MarshalBinary": {},
+			"*.GobEncode":     {},
+		}
 	}
 
 	for _, exclusion := range s.Exclusions {
-		a.excludedTuple[exclusion] = struct{}{}
+		a.excluded[exclusion] = struct{}{}
 	}
 
 	return &analysis.Analyzer{
@@ -57,8 +56,7 @@ type Settings struct {
 }
 
 type analyzer struct {
-	excludedMethods map[string]struct{}
-	excludedTuple   map[string]struct{}
+	excluded map[string]struct{}
 }
 
 func (r *analyzer) run(pass *analysis.Pass) (any, error) {
@@ -71,16 +69,12 @@ func (r *analyzer) run(pass *analysis.Pass) (any, error) {
 			return
 		}
 
-		if r.isBuildInExcluded(funcDecl) {
-			return
-		}
-
 		recv, isStar := recvTypeIdent(funcDecl.Recv.List[0].Type)
 		if recv == nil {
 			return
 		}
 
-		if r.isUserExcluded(recv, funcDecl) {
+		if r.isExcluded(recv, funcDecl) {
 			return
 		}
 
@@ -106,27 +100,18 @@ func (r *analyzer) run(pass *analysis.Pass) (any, error) {
 	return nil, nil
 }
 
-func (r *analyzer) isUserExcluded(recv *ast.Ident, f *ast.FuncDecl) bool {
+func (r *analyzer) isExcluded(recv *ast.Ident, f *ast.FuncDecl) bool {
 	if f.Name == nil || f.Name.Name == "" {
 		return true
 	}
 
-	_, found := r.excludedTuple[recv.Name+"."+f.Name.Name]
+	_, found := r.excluded[recv.Name+"."+f.Name.Name]
 	if found {
 		return true
 	}
 
-	_, found = r.excludedTuple["*."+f.Name.Name]
+	_, found = r.excluded["*."+f.Name.Name]
 
-	return found
-}
-
-func (r *analyzer) isBuildInExcluded(f *ast.FuncDecl) bool {
-	if f.Name == nil || f.Name.Name == "" {
-		return true
-	}
-
-	_, found := r.excludedMethods[f.Name.Name]
 	return found
 }
 
