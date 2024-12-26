@@ -10,21 +10,25 @@ import (
 
 // NewAnalyzer returns a new analyzer to check for receiver type consistency.
 func NewAnalyzer(s Settings) *analysis.Analyzer {
-	// Default excludes for Marshal/Encode methods https://github.com/raeperd/recvcheck/issues/7
-	excludedMethods := map[string]struct{}{
-		"MarshalText":   {},
-		"MarshalJSON":   {},
-		"MarshalYAML":   {},
-		"MarshalXML":    {},
-		"MarshalBinary": {},
-		"GobEncode":     {},
+	a := &analyzer{
+		excluded: map[string]struct{}{},
 	}
 
-	if s.DisableBuiltin {
-		excludedMethods = map[string]struct{}{}
+	if !s.DisableBuiltin {
+		// Default excludes for Marshal/Encode methods https://github.com/raeperd/recvcheck/issues/7
+		a.excluded = map[string]struct{}{
+			"*.MarshalText":   {},
+			"*.MarshalJSON":   {},
+			"*.MarshalYAML":   {},
+			"*.MarshalXML":    {},
+			"*.MarshalBinary": {},
+			"*.GobEncode":     {},
+		}
 	}
 
-	a := &analyzer{excludedMethods: excludedMethods}
+	for _, exclusion := range s.Exclusions {
+		a.excluded[exclusion] = struct{}{}
+	}
 
 	return &analysis.Analyzer{
 		Name:     "recvcheck",
@@ -45,10 +49,14 @@ type Settings struct {
 	//   - "MarshalBinary"
 	//   - "GobEncode"
 	DisableBuiltin bool
+
+	// Exclusions format is `struct_name.method_name` (ex: `Foo.MethodName`).
+	// A wildcard `*` can use as a struct name (ex: `*.MethodName`).
+	Exclusions []string
 }
 
 type analyzer struct {
-	excludedMethods map[string]struct{}
+	excluded map[string]struct{}
 }
 
 func (r *analyzer) run(pass *analysis.Pass) (any, error) {
@@ -61,21 +69,12 @@ func (r *analyzer) run(pass *analysis.Pass) (any, error) {
 			return
 		}
 
-		if r.isExcluded(funcDecl) {
+		recv, isStar := recvTypeIdent(funcDecl.Recv.List[0].Type)
+		if recv == nil {
 			return
 		}
 
-		var recv *ast.Ident
-		var isStar bool
-		switch recvType := funcDecl.Recv.List[0].Type.(type) {
-		case *ast.StarExpr:
-			isStar = true
-			if recv, ok = recvType.X.(*ast.Ident); !ok {
-				return
-			}
-		case *ast.Ident:
-			recv = recvType
-		default:
+		if r.isExcluded(recv, funcDecl) {
 			return
 		}
 
@@ -101,16 +100,36 @@ func (r *analyzer) run(pass *analysis.Pass) (any, error) {
 	return nil, nil
 }
 
-func (r *analyzer) isExcluded(f *ast.FuncDecl) bool {
+func (r *analyzer) isExcluded(recv *ast.Ident, f *ast.FuncDecl) bool {
 	if f.Name == nil || f.Name.Name == "" {
 		return true
 	}
 
-	_, found := r.excludedMethods[f.Name.Name]
+	_, found := r.excluded[recv.Name+"."+f.Name.Name]
+	if found {
+		return true
+	}
+
+	_, found = r.excluded["*."+f.Name.Name]
+
 	return found
 }
 
 type structType struct {
 	starUsed bool
 	typeUsed bool
+}
+
+func recvTypeIdent(r ast.Expr) (*ast.Ident, bool) {
+	switch n := r.(type) {
+	case *ast.StarExpr:
+		if i, ok := n.X.(*ast.Ident); ok {
+			return i, true
+		}
+
+	case *ast.Ident:
+		return n, false
+	}
+
+	return nil, false
 }
