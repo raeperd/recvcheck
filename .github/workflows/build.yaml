@@ -24,6 +24,9 @@ jobs:
           git diff --exit-code go.sum
       - run: make build
       - run: make test
+      - uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: coverage.txt
 
   lint:
     runs-on: ubuntu-latest
