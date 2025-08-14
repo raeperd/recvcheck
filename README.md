@@ -40,6 +40,7 @@ func main() {
 ```
 
 ### 🚨 Silent Bugs
+
 Value receivers create copies, so modifications are lost:
 
 ```go
@@ -52,9 +53,11 @@ func (c Counter) Reset() { c.value = 0 }     // value receiver - NO EFFECT!
 ```
 
 ### 🤔 Developer Confusion
+
 Mixed receivers make code behavior unpredictable and harder to reason about.
 
 ### ✅ The Solution
+
 **Consistency is key**: Go's official guidance says [Don't mix receiver types](https://go.dev/wiki/CodeReviewComments#receiver-type). Choose either pointers or values for **all** methods on a type.
 
 `recvcheck` automatically detects these issues before they reach production.
