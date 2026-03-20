@@ -4,10 +4,10 @@ type Node struct{}
 
 type YAML struct{}
 
-func (y YAML) GetData() []byte {
+func (j YAML) MarshalYAML() (any, error) {
 	panic("not implemented")
 }
 
-func (y *YAML) UnmarshalYAML(value *Node) error {
+func (j *YAML) UnmarshalYAML(value *Node) error {
 	panic("not implemented")
 }

@@ -2,7 +2,7 @@ package builtinmethods
 
 type Text struct{}
 
-func (t Text) GetData() []byte {
+func (t Text) MarshalText() ([]byte, error) {
 	panic("not implemented")
 }
 

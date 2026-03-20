@@ -2,7 +2,7 @@ package builtinmethods
 
 type Gob struct{}
 
-func (g Gob) GetData() []byte {
+func (g Gob) GobEncode() ([]byte, error) {
 	panic("not implemented")
 }
 
