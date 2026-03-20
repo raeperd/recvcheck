@@ -11,7 +11,7 @@ func main() {
 	var noBuiltinExcludeMethod bool
 
 	flag.BoolVar(&noBuiltinExcludeMethod, "no-builtin-exclude-method", false,
-		`disables the default exclude methods such as "MarshalJSON"`)
+		`disables the default exclude methods such as "UnmarshalJSON"`)
 
 	setting := recvcheck.Settings{
 		DisableBuiltin: noBuiltinExcludeMethod,

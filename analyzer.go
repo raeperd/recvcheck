@@ -42,12 +42,12 @@ func NewAnalyzer(s Settings) *analysis.Analyzer {
 type Settings struct {
 	// DisableBuiltin if true, disables the built-in method excludes.
 	// Built-in excluded methods:
-	//   - "MarshalText"
-	//   - "MarshalJSON"
-	//   - "MarshalYAML"
-	//   - "MarshalXML"
-	//   - "MarshalBinary"
-	//   - "GobEncode"
+	//   - "UnmarshalText"
+	//   - "UnmarshalJSON"
+	//   - "UnmarshalYAML"
+	//   - "UnmarshalXML"
+	//   - "UnmarshalBinary"
+	//   - "GobDecode"
 	DisableBuiltin bool
 
 	// Exclusions format is `struct_name.method_name` (ex: `Foo.MethodName`).
