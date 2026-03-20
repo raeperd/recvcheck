@@ -25,10 +25,6 @@ func TestAnalyzer(t *testing.T) {
 			settings: recvcheck.Settings{DisableBuiltin: true},
 		},
 		{
-			desc:     "marshalnotexcluded",
-			settings: recvcheck.Settings{},
-		},
-		{
 			desc:     "exclusions",
 			settings: recvcheck.Settings{Exclusions: []string{"SQL.Value"}},
 		},

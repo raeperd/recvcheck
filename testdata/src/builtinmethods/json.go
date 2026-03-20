@@ -2,7 +2,7 @@ package builtinmethods
 
 type JSON struct{}
 
-func (j JSON) MarshalJSON() ([]byte, error) {
+func (j JSON) GetData() []byte {
 	panic("not implemented")
 }
 

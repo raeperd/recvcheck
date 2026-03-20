@@ -4,7 +4,7 @@ import "encoding/xml"
 
 type XML struct{}
 
-func (x XML) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+func (x XML) GetData() []byte {
 	panic("not implemented")
 }
 

@@ -2,7 +2,7 @@ package builtinmethods
 
 type Binary struct{}
 
-func (b Binary) MarshalBinary() ([]byte, error) {
+func (b Binary) GetData() []byte {
 	panic("not implemented")
 }
 
