@@ -105,9 +105,9 @@ linters-settings:
 
 ### Default Exclusions
 
-Marshal methods are excluded by default as they commonly use value receivers:
-- `*.MarshalText`, `*.MarshalJSON`, `*.MarshalYAML`
-- `*.MarshalXML`, `*.MarshalBinary`, `*.GobEncode`
+Unmarshal methods are excluded by default as they must use pointer receivers:
+- `*.UnmarshalText`, `*.UnmarshalJSON`, `*.UnmarshalYAML`
+- `*.UnmarshalXML`, `*.UnmarshalBinary`, `*.GobDecode`
 
 ## Examples
 
