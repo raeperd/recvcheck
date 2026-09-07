@@ -29,7 +29,7 @@ jobs:
           git diff --exit-code go.sum
       - run: make build
       - run: make test
-      - uses: shogo82148/actions-goveralls@8781f5dd05b691c4dd042d5e859c11c73e0104fa # v1.11.1
+      - uses: shogo82148/actions-goveralls@77a1912dca42260ee3e97f61bd13ea7ef40baa93 # v1.11.2
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           path-to-profile: coverage.txt
