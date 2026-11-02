@@ -29,7 +29,7 @@ jobs:
           git diff --exit-code go.sum
       - run: make build
       - run: make test
-      - uses: shogo82148/actions-goveralls@daabb2902148216a0b13c82107a6e67ed97f796e # v1.11.3
+      - uses: shogo82148/actions-goveralls@548a2a7896df420c38df648845a5525a33f82585 # v1.11.5
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           path-to-profile: coverage.txt
@@ -66,7 +66,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
+      - uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
         with:
           advanced-security: false
           annotations: true
