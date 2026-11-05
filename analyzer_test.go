@@ -38,7 +38,7 @@ func TestAnalyzer(t *testing.T) {
 		t.Run(test.desc, func(t *testing.T) {
 			a := recvcheck.NewAnalyzer(test.settings)
 
-			analysistest.Run(t, analysistest.TestData(), a, test.desc)
+			analysistest.RunWithSuggestedFixes(t, analysistest.TestData(), a, test.desc)
 		})
 	}
 }
