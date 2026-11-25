@@ -1,6 +1,7 @@
 package recvcheck
 
 import (
+	"fmt"
 	"go/ast"
 
 	"golang.org/x/tools/go/analysis"
@@ -89,13 +90,28 @@ func (r *analyzer) run(pass *analysis.Pass) (any, error) {
 		if isStar {
 			st.starUsed = true
 		} else {
-			st.typeUsed = true
+			st.valueRecvTypes = append(st.valueRecvTypes, recv)
 		}
 	})
 
 	for recv, st := range structs {
-		if st.starUsed && st.typeUsed {
-			pass.Reportf(pass.Pkg.Scope().Lookup(recv).Pos(), "the methods of %q use pointer receiver and non-pointer receiver.", recv)
+		if st.starUsed && len(st.valueRecvTypes) > 0 {
+			edits := make([]analysis.TextEdit, len(st.valueRecvTypes))
+			for i, ident := range st.valueRecvTypes {
+				edits[i] = analysis.TextEdit{
+					Pos:     ident.Pos(),
+					End:     ident.Pos(),
+					NewText: []byte("*"),
+				}
+			}
+			pass.Report(analysis.Diagnostic{
+				Pos:     pass.Pkg.Scope().Lookup(recv).Pos(),
+				Message: fmt.Sprintf("the methods of %q use pointer receiver and non-pointer receiver.", recv),
+				SuggestedFixes: []analysis.SuggestedFix{{
+					Message:   fmt.Sprintf("use pointer receiver for %q", recv),
+					TextEdits: edits,
+				}},
+			})
 		}
 	}
 
@@ -118,8 +134,8 @@ func (r *analyzer) isExcluded(recv *ast.Ident, f *ast.FuncDecl) bool {
 }
 
 type structType struct {
-	starUsed bool
-	typeUsed bool
+	starUsed       bool
+	valueRecvTypes []*ast.Ident
 }
 
 func recvTypeIdent(r ast.Expr) (*ast.Ident, bool) {
