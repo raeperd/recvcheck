@@ -105,9 +105,9 @@ linters-settings:
 
 ### Default Exclusions
 
-Unmarshal methods are excluded by default as they must use pointer receivers:
+Unmarshal and Scan methods are excluded by default as they must use pointer receivers:
 - `*.UnmarshalText`, `*.UnmarshalJSON`, `*.UnmarshalJSONFrom`, `*.UnmarshalYAML`
-- `*.UnmarshalXML`, `*.UnmarshalBinary`, `*.GobDecode`
+- `*.UnmarshalXML`, `*.UnmarshalBinary`, `*.GobDecode`, `*.Scan`
 
 ## Examples
 

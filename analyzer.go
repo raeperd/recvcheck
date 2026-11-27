@@ -25,6 +25,7 @@ func NewAnalyzer(s Settings) *analysis.Analyzer {
 			"*.UnmarshalXML":      {},
 			"*.UnmarshalBinary":   {},
 			"*.GobDecode":         {},
+			"*.Scan":              {},
 		}
 	}
 
@@ -51,6 +52,7 @@ type Settings struct {
 	//   - "UnmarshalXML"
 	//   - "UnmarshalBinary"
 	//   - "GobDecode"
+	//   - "Scan"
 	DisableBuiltin bool
 
 	// Exclusions format is `struct_name.method_name` (ex: `Foo.MethodName`).

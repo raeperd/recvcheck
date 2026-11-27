@@ -26,11 +26,11 @@ func TestAnalyzer(t *testing.T) {
 		},
 		{
 			desc:     "exclusions",
-			settings: recvcheck.Settings{Exclusions: []string{"SQL.Value"}},
+			settings: recvcheck.Settings{DisableBuiltin: true, Exclusions: []string{"SQL.Value"}},
 		},
 		{
 			desc:     "exclusionswildcard",
-			settings: recvcheck.Settings{Exclusions: []string{"*.Value"}},
+			settings: recvcheck.Settings{DisableBuiltin: true, Exclusions: []string{"*.Value"}},
 		},
 	}
 
